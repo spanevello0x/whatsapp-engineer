@@ -41,7 +41,7 @@ python3 scripts/configure.py
 Pareamento por QR:
 
 ```bash
-python3 workspace/run.py connect --project Equipe --name Principal --number <PHONE_E164>
+python3 workspace/run.py connect --project Equipe --name Principal --number PHONE_E164
 ```
 
 Depois do scan, valide:

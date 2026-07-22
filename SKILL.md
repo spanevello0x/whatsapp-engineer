@@ -382,7 +382,7 @@ Se o MCP nao estiver configurado/anexado neste runtime, use a leitura direta da 
 
 ```bash
 python3 ~/.openclaw/skills/whatsapp-engineer/workspace/run.py status
-python3 ~/.openclaw/skills/whatsapp-engineer/workspace/run.py connect --project Equipe --name Principal --number <PHONE_E164>
+python3 ~/.openclaw/skills/whatsapp-engineer/workspace/run.py connect --project Equipe --name Principal --number PHONE_E164
 python3 ~/.openclaw/skills/whatsapp-engineer/workspace/run.py history-search --year 2026 --limit 100
 ```
 

@@ -1,0 +1,9 @@
+[project]
+name = "whatsapp-profiles-mcp-server"
+version = "0.1.0"
+description = "Profile-aware WhatsApp MCP server for local SQLite bases"
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=1.6.0",
+    "requests>=2.32.3",
+]

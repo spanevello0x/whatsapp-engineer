@@ -1,0 +1,13 @@
+interface:
+  display_name: "WhatsApp Engineer"
+  short_description: "Resume WhatsApp to chosen targets."
+  default_prompt: "Use $whatsapp-engineer at /home/openclaw/.openclaw/workspace/skills/whatsapp-engineer to configure OpenClaw agent, summarize WhatsApp messages and audio, and deliver the digest to my chosen target."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "whatsapp-profiles"
+      description: "Reads local WhatsApp profile databases and downloads media through whatsapp-mcp-local-kit."
+
+policy:
+  allow_implicit_invocation: true

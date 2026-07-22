@@ -1,0 +1,42 @@
+{
+  "name": "whatsapp-engineer",
+  "version": "1.14.4",
+  "description": "Orquestra monitoramento local de WhatsApp com Baileys, SQLite, MCP whatsapp-profiles, transcrição de áudio e entrega de resumos.",
+  "author": "OpenClaw Community",
+  "license": "MIT",
+  "homepage": "https://github.com/spanevello0x/whatsapp-engineer",
+  "min_openclaw_version": "2026.4.0",
+  "runtime": "openclaw",
+  "entry": ".",
+  "permissions": {
+    "allow": [
+      "group:fs",
+      "group:network"
+    ],
+    "elevated": [],
+    "deny": []
+  },
+  "dependencies": {
+    "bins": [
+      "python3",
+      "node",
+      "npm"
+    ],
+    "env": []
+  },
+  "pricing_tier": "free",
+  "tags": [
+    "whatsapp",
+    "telegram",
+    "digest",
+    "audio",
+    "qr",
+    "mcp",
+    "sqlite",
+    "baileys",
+    "mqc"
+  ],
+  "visibility": "advanced",
+  "audience": "developer",
+  "operational_scope": "single-number-owner"
+}

@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PRD - WhatsApp Engineer</title>
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --ink: #17202a;
+      --muted: #526171;
+      --line: #dce2e8;
+      --accent: #167257;
+      --accent-2: #2f5f9f;
+      --warn: #8a5a00;
+      --danger: #9b2c2c;
+      --code: #eef3f6;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.55;
+    }
+
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      padding: 28px 32px;
+    }
+
+    main {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 28px 20px 56px;
+    }
+
+    section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      margin: 0 0 18px;
+      padding: 22px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 12px;
+    }
+
+    h1 { font-size: 30px; }
+    h2 { font-size: 21px; color: var(--accent-2); }
+    h3 { font-size: 17px; margin-top: 18px; }
+
+    p { margin: 0 0 12px; }
+
+    ul, ol { margin: 8px 0 0 22px; padding: 0; }
+    li { margin: 6px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #edf2f7;
+      color: #25384d;
+    }
+
+    code, pre {
+      background: var(--code);
+      color: #10202f;
+      border-radius: 6px;
+    }
+
+    code { padding: 2px 5px; }
+
+    pre {
+      overflow: auto;
+      padding: 14px;
+      border: 1px solid var(--line);
+      margin: 12px 0 0;
+    }
+
+    .meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .meta div {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      background: #fbfcfd;
+    }
+
+    .label {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .ok { color: var(--accent); font-weight: 700; }
+    .warn { color: var(--warn); font-weight: 700; }
+    .danger { color: var(--danger); font-weight: 700; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>PRD - WhatsApp Engineer</h1>
+    <p>Skill OpenClaw para o OpenClaw agent resumir conversas do WhatsApp e entregar o resultado no destino escolhido pelo usuario.</p>
+    <div class="meta">
+      <div>
+        <span class="label">Skill path</span>
+        <code>/home/openclaw/.openclaw/workspace/skills/whatsapp-engineer</code>
+      </div>
+      <div>
+        <span class="label">Config padrao</span>
+        <code>~/.openclaw/state/whatsapp-engineer/config.json</code>
+      </div>
+      <div>
+        <span class="label">Wizard</span>
+        <code>python3 ~/.openclaw/workspace/skills/whatsapp-engineer/scripts/configure.py</code>
+      </div>
+      <div>
+        <span class="label">Teste Telegram</span>
+        <code>python3 ~/.openclaw/workspace/skills/whatsapp-engineer/scripts/test_delivery.py --send</code>
+      </div>
+      <div>
+        <span class="label">Status</span>
+        <span class="ok">Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section>
+      <h2>1. Objetivo</h2>
+      <p>
+        Criar uma skill operacional para o agente OpenClaw ler historico local do WhatsApp via MCP
+        <code>whatsapp-profiles</code>, gerar resumos de texto, links, arquivos e audios, e entregar esses resumos
+        no local definido pelo usuario.
+      </p>
+      <p>
+        O produto deve funcionar como camada de orquestracao: a skill nao substitui o MCP de WhatsApp,
+        nem os conectores de entrega. A transcricao de audio e nativa na skill via
+        <code>scripts/transcribe_audio.py</code>. O PRD define o fluxo, o formato de configuracao,
+        os guardrails e o comportamento esperado.
+      </p>
+    </section>
+
+    <section>
+      <h2>2. Usuarios E Casos De Uso</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Usuario</th>
+            <th>Necessidade</th>
+            <th>Resultado esperado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Dono/operador do OpenClaw agent</td>
+            <td>Receber resumo diario ou sob demanda de grupos e chats importantes.</td>
+            <td>Mensagem consolidada em Telegram, WhatsApp, Discord ou destino manual.</td>
+          </tr>
+          <tr>
+            <td>Equipe comercial</td>
+            <td>Acompanhar pendencias, clientes, orcamentos, audios e links enviados por vendedores.</td>
+            <td>Resumo com decisoes, responsaveis e proximas acoes.</td>
+          </tr>
+          <tr>
+            <td>Equipe administrativa</td>
+            <td>Monitorar documentos, pagamentos, demandas e riscos em grupos de WhatsApp.</td>
+            <td>Resumo operacional com anexos e itens acionaveis.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>3. Escopo</h2>
+      <h3>Incluido</h3>
+      <ul>
+        <li>Wizard para configurar origem, periodo, audio, formato e destino de entrega.</li>
+        <li>Leitura de mensagens via MCP <code>whatsapp-profiles</code>.</li>
+        <li>Inventario de links, imagens, videos, documentos, PDFs e audios.</li>
+        <li>Download de midia quando a bridge do perfil estiver aberta.</li>
+        <li>Transcricao de audio nativa via <code>scripts/transcribe_audio.py</code> e <code>faster-whisper</code>.</li>
+        <li>Entrega configuravel em Telegram, WhatsApp, Discord, manual ou custom.</li>
+        <li>Guardrails para nao salvar tokens, QR Codes, sessoes, bancos SQLite ou midias privadas na skill.</li>
+      </ul>
+
+      <h3>Fora Do Escopo Atual</h3>
+      <ul>
+        <li>Enviar mensagens por WhatsApp sem adaptador/tool explicito de envio.</li>
+        <li>Rodar agendamento persistente sem um scheduler externo do OpenClaw, cron, systemd ou TaskFlow.</li>
+        <li>Hospedar webhook publico para Telegram ou Discord dentro da skill.</li>
+        <li>Armazenar historico completo de resumos dentro do repositorio da skill.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>4. Arquitetura</h2>
+      <ol>
+        <li>Usuario executa o wizard <code>scripts/configure.py</code>.</li>
+        <li>Wizard grava <code>~/.openclaw/state/whatsapp-engineer/config.json</code> com permissao <code>0600</code>.</li>
+        <li>OpenClaw agent consulta perfis e mensagens via MCP <code>whatsapp-profiles</code>.</li>
+        <li>OpenClaw agent lista assets e baixa audios relevantes quando necessario.</li>
+        <li>OpenClaw agent transcreve audio via <code>scripts/transcribe_audio.py</code>.</li>
+        <li>OpenClaw agent monta o resumo conforme <code>references/digest-format.md</code>.</li>
+        <li>OpenClaw agent entrega no destino definido em <code>destinations.primary</code>.</li>
+        <li>Para Telegram, <code>scripts/test_delivery.py --send</code> pode medir o tempo da chamada ao Bot API.</li>
+      </ol>
+
+      <pre><code>WhatsApp local DB
+  -> whatsapp-profiles MCP
+  -> OpenClaw agent / whatsapp-engineer
+  -> audio transcription, digest, safety checks
+  -> Telegram | WhatsApp adapter | Discord | manual/custom</code></pre>
+    </section>
+
+    <section>
+      <h2>5. Wizard</h2>
+      <p>O wizard deve coletar configuracao operacional sem pedir segredo direto.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Campo</th>
+            <th>Descricao</th>
+            <th>Exemplo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>source.profiles</code></td>
+            <td>Perfis do WhatsApp a consultar. Vazio significa todos.</td>
+            <td><code>vendedor-joao, financeiro</code></td>
+          </tr>
+          <tr>
+            <td><code>source.chats</code></td>
+            <td>Chats, grupos ou JIDs especificos. Vazio significa todos filtrados pelo periodo.</td>
+            <td><code><GROUP_JID></code></td>
+          </tr>
+          <tr>
+            <td><code>source.default_period</code></td>
+            <td>Periodo padrao de busca.</td>
+            <td><code>last_24h</code></td>
+          </tr>
+          <tr>
+            <td><code>audio.transcribe</code></td>
+            <td>Define se audios relevantes serao baixados e transcritos.</td>
+            <td><code>true</code></td>
+          </tr>
+          <tr>
+            <td><code>destinations.primary</code></td>
+            <td>Destino escolhido pelo usuario.</td>
+            <td><code>telegram</code>, <code>whatsapp</code>, <code>discord</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>6. Destinos De Entrega</h2>
+      <h3>Telegram</h3>
+      <ul>
+        <li>Suporta grupo, canal, chat privado e topico/forum.</li>
+        <li>Usa <code>chat_id</code> e, para topico, <code>message_thread_id</code>.</li>
+        <li>Token deve ficar em variavel de ambiente, por exemplo <code>TELEGRAM_BOT_TOKEN</code>.</li>
+        <li>Teste de entrega mede latencia da chamada HTTP, nao confirmacao de leitura.</li>
+      </ul>
+
+      <h3>WhatsApp</h3>
+      <ul>
+        <li>Suporta configuracao para grupo, direto, canal ou lista.</li>
+        <li>Exige <code>profile_slug</code>, <code>chat_jid</code> e um <code>send_adapter</code>.</li>
+        <li><span class="warn">Limitacao atual:</span> o MCP <code>whatsapp-profiles</code> do kit e leitura/download; envio real exige adaptador separado.</li>
+      </ul>
+
+      <h3>Discord</h3>
+      <ul>
+        <li>Suporta webhook ou bot adapter.</li>
+        <li>Webhook URL ou bot token devem ficar em variaveis de ambiente.</li>
+        <li>Mensagens devem usar Markdown simples e respeitar limite da plataforma.</li>
+      </ul>
+
+      <h3>Manual/Custom</h3>
+      <ul>
+        <li>Gera o resumo e marca publicacao como pendente ou delegada.</li>
+        <li>Serve para Slack, email, Notion, CRM ou outro destino futuro.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>6.1 Multiplos Numeros E Funcionarios</h2>
+      <p>
+        O WhatsApp Engineer deve suportar analise de varios numeros usando o modo perfis do
+        <code>whatsapp-mcp-local-kit</code>. Cada funcionario deve ser cadastrado como um perfil separado,
+        com sessao, porta local, <code>whatsapp.db</code> e <code>messages.db</code> proprios.
+      </p>
+      <pre><code>1 numero de WhatsApp = 1 perfil
+1 funcionario = normalmente 1 perfil
+varios funcionarios = varios perfis em source.profiles</code></pre>
+      <h3>Fluxo De Cadastro</h3>
+      <ol>
+        <li>Abrir o painel <code>WhatsApp MCP Tray</code>.</li>
+        <li>Criar um projeto, como <code>Vendedores</code>, <code>Financeiro</code> ou <code>Suporte</code>.</li>
+        <li>Criar um perfil por funcionario, como <code>vendedor-joao</code> ou <code>financeiro-ana</code>.</li>
+        <li>Clicar em <code>Conectar QR</code>.</li>
+        <li>O funcionario escaneia o QR em <code>WhatsApp &gt; Aparelhos conectados &gt; Conectar aparelho</code>.</li>
+        <li>Aguardar a primeira sincronizacao inteligente.</li>
+        <li>Repetir para cada funcionario.</li>
+      </ol>
+      <h3>Analise Pelo OpenClaw agent</h3>
+      <p>
+        O OpenClaw agent deve consultar <code>list_profiles</code>, filtrar os perfis definidos em
+        <code>source.profiles</code> e agrupar os resultados por projeto, perfil/funcionario,
+        grupo/chat, remetente e periodo. Se <code>source.profiles</code> estiver vazio, o OpenClaw agent pode
+        analisar todos os perfis habilitados.
+      </p>
+      <h3>Guardrails</h3>
+      <ul>
+        <li>Funcionario precisa autorizar o pareamento por QR.</li>
+        <li>Nao misturar sessoes, bancos ou pastas entre funcionarios.</li>
+        <li>Nao apagar bancos ou sessoes sem confirmacao explicita.</li>
+        <li>Indicar no resumo qual perfil/funcionario originou cada item importante.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>7. Requisitos Funcionais</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Requisito</th>
+            <th>Prioridade</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>RF-01</td>
+            <td>Permitir configurar perfis e chats de origem.</td>
+            <td>Alta</td>
+          </tr>
+          <tr>
+            <td>RF-02</td>
+            <td>Permitir configurar destino de entrega pelo usuario.</td>
+            <td>Alta</td>
+          </tr>
+          <tr>
+            <td>RF-03</td>
+            <td>Suportar Telegram com topico/forum por <code>message_thread_id</code>.</td>
+            <td>Alta</td>
+          </tr>
+          <tr>
+            <td>RF-04</td>
+            <td>Suportar WhatsApp como destino quando houver adaptador de envio.</td>
+            <td>Media</td>
+          </tr>
+          <tr>
+            <td>RF-05</td>
+            <td>Suportar Discord por webhook ou bot adapter.</td>
+            <td>Media</td>
+          </tr>
+          <tr>
+            <td>RF-06</td>
+            <td>Transcrever audios relevantes quando habilitado.</td>
+            <td>Alta</td>
+          </tr>
+          <tr>
+            <td>RF-07</td>
+            <td>Gerar resumo com pontos, decisoes, pendencias, audios, links e arquivos.</td>
+            <td>Alta</td>
+          </tr>
+          <tr>
+            <td>RF-08</td>
+            <td>Gerar payload de teste Telegram e medir latencia de envio quando autorizado.</td>
+            <td>Media</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>8. Requisitos Nao Funcionais</h2>
+      <ul>
+        <li><strong>Privacidade:</strong> nao salvar tokens, QR Codes, bancos SQLite, sessoes, logs reais ou midias privadas na pasta da skill.</li>
+        <li><strong>Seguranca:</strong> usar variaveis de ambiente para tokens e webhooks.</li>
+        <li><strong>Auditabilidade:</strong> config JSON legivel e versionado por schema, mas fora do Git.</li>
+        <li><strong>Portabilidade:</strong> manter adaptadores por plataforma separados.</li>
+        <li><strong>Resiliencia:</strong> quando uma midia nao puder ser baixada, resumir o contexto textual e apontar o bloqueio.</li>
+        <li><strong>Clareza:</strong> todo resumo deve indicar origem e periodo.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>9. Schema De Configuracao</h2>
+      <pre><code>{
+  "version": 1,
+  "agent": {
+    "name": "agent"
+  },
+  "source": {
+    "mcp": "whatsapp-profiles",
+    "profiles": ["vendedor-joao"],
+    "chats": ["<GROUP_JID>"],
+    "default_period": "last_24h"
+  },
+  "audio": {
+    "transcribe": true,
+    "engine": "native-faster-whisper",
+    "script": "~/.openclaw/workspace/skills/whatsapp-engineer/scripts/transcribe_audio.py",
+    "setup_script": "~/.openclaw/workspace/skills/whatsapp-engineer/scripts/setup_transcription.py",
+    "language": "pt",
+    "model": "tiny",
+    "task": "transcribe"
+  },
+  "digest": {
+    "include_links": true,
+    "include_audio": true,
+    "max_messages": 120,
+    "format": "operational"
+  },
+  "destinations": {
+    "primary": {
+      "type": "telegram",
+      "target_kind": "topic",
+      "chat_id": "-1001234567890",
+      "message_thread_id": 123,
+      "token_env": "TELEGRAM_BOT_TOKEN",
+      "parse_mode": "HTML"
+    }
+  },
+  "safety": {
+    "redact_phone_numbers": false,
+    "require_confirmation_for_whatsapp_send": true,
+    "confirm_first_delivery": true,
+    "never_store_tokens": true
+  }
+}</code></pre>
+    </section>
+
+    <section>
+      <h2>10. Formato Do Resumo</h2>
+      <ol>
+        <li>Cabeçalho com periodo, origem e destino.</li>
+        <li>Principais pontos consolidados.</li>
+        <li>Pendencias com responsavel e prazo quando identificado.</li>
+        <li>Decisoes tomadas ou indicios de decisao.</li>
+        <li>Audios resumidos com horario e remetente.</li>
+        <li>Links e arquivos acionaveis.</li>
+        <li>Riscos, bloqueios e alertas.</li>
+      </ol>
+    </section>
+
+    <section>
+      <h2>11. Guardrails</h2>
+      <ul>
+        <li>Confirmar a primeira entrega em qualquer destino de grupo/canal.</li>
+        <li>Exigir confirmacao explicita para envio em WhatsApp.</li>
+        <li>Mascarar telefones quando <code>safety.redact_phone_numbers</code> estiver ativo.</li>
+        <li>Se o volume de mensagens for alto, pedir recorte por periodo, perfil ou chat antes de publicar.</li>
+        <li>Separar fatos de inferencias no resumo.</li>
+        <li>Nao prometer envio por WhatsApp sem adaptador de envio instalado e testado.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>12. Criterios De Aceite</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Cenario</th>
+            <th>Resultado esperado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Rodar o wizard</td>
+            <td>Arquivo <code>config.json</code> criado em <code>~/.openclaw/state/whatsapp-engineer/</code> com permissao <code>0600</code>.</td>
+          </tr>
+          <tr>
+            <td>Escolher Telegram topico</td>
+            <td>Config contem <code>type: telegram</code>, <code>target_kind: topic</code>, <code>chat_id</code> e <code>message_thread_id</code>.</td>
+          </tr>
+          <tr>
+            <td>Escolher WhatsApp grupo</td>
+            <td>Config contem <code>requires_send_adapter: true</code> e <code>require_confirmation: true</code>.</td>
+          </tr>
+          <tr>
+            <td>Escolher Discord webhook</td>
+            <td>Config salva apenas o nome da variavel <code>DISCORD_WEBHOOK_URL</code>, nao a URL real.</td>
+          </tr>
+          <tr>
+            <td>Resumo com audio</td>
+            <td>Audio baixado quando possivel, transcrito pela skill de voz e resumido no digest.</td>
+          </tr>
+          <tr>
+            <td>Skill validation</td>
+            <td><code>quick_validate.py</code> retorna <code>Skill is valid!</code>.</td>
+          </tr>
+          <tr>
+            <td>Teste Telegram dry-run</td>
+            <td><code>test_delivery.py</code> mostra payload sem token e sem enviar mensagem.</td>
+          </tr>
+          <tr>
+            <td>Teste Telegram real</td>
+            <td><code>test_delivery.py --send</code> envia mensagem quando <code>chat_id</code> e token por env estiverem configurados, reportando tempo em ms.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>13. Roadmap</h2>
+      <ol>
+        <li>Adicionar executor de digest sob demanda usando o config gerado.</li>
+        <li>Adicionar scheduler via TaskFlow, cron ou systemd user timer.</li>
+        <li>Implementar adaptador de envio por WhatsApp quando a tool de envio estiver disponivel.</li>
+        <li>Adicionar suporte a multiplos destinos simultaneos.</li>
+        <li>Adicionar historico local opcional de resumos, sem mensagens brutas.</li>
+      </ol>
+    </section>
+  </main>
+</body>
+</html>
